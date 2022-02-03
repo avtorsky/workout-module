@@ -10,6 +10,9 @@ OOP module that calculates and display the information of the last workout sessi
 Developed under the [Practicum](https://practicum.yandex.com/) online bootcamp.
 
 ## Changelog
+Release 20220204:
+* fix(homework.py): read_package() validation update and minor syntax imporvements
+
 Release 20220202:
 * feat(homework.py): subclasses and master function release, pytest && mypy type hinting debug
 
