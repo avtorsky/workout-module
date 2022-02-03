@@ -1,21 +1,16 @@
+from dataclasses import dataclass, field
 from typing import Dict, Type
 
 
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
 
-    def __init__(self,
-                 training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float,
-                 ) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self) -> str:
         return (f'Тип тренировки: {self.training_type}; '
@@ -25,21 +20,17 @@ class InfoMessage:
                 f'Потрачено ккал: {self.calories:.3f}.')
 
 
+@dataclass
 class Training:
     """Базовый класс тренировки."""
 
-    LEN_STEP: float = 0.65
-    M_IN_KM: int = 1000
-    MINUTES_IN_HOUR: int = 60
+    LEN_STEP: float = field(default=0.65, init=False)
+    M_IN_KM: int = field(default=1000, init=False)
+    MINUTES_IN_HOUR: int = field(default=60, init=False)
 
-    def __init__(self,
-                 action: int,
-                 duration: float,
-                 weight: float,
-                 ) -> None:
-        self.action = action
-        self.duration = duration
-        self.weight = weight
+    action: int
+    duration: float
+    weight: float
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -53,7 +44,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        raise NotImplementedError
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -66,11 +57,12 @@ class Training:
         )
 
 
+@dataclass
 class Running(Training):
     """Тренировка: бег."""
 
-    RUNNING_SPEED_COEFF_1: float = 18.0
-    RUNNING_SPEED_COEFF_2: float = 20.0
+    RUNNING_SPEED_COEFF_1: float = field(default=18.0, init=False)
+    RUNNING_SPEED_COEFF_2: float = field(default=20.0, init=False)
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при беге."""
@@ -83,16 +75,14 @@ class Running(Training):
         return running_spent_calories
 
 
+@dataclass
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
 
-    SPORTS_WALKING_CALORIES_COEFF_1: float = 0.035
-    SPORTS_WALKING_CALORIES_COEFF_2: float = 0.029
+    SPORTS_WALKING_CALORIES_COEFF_1: float = field(default=0.035, init=False)
+    SPORTS_WALKING_CALORIES_COEFF_2: float = field(default=0.029, init=False)
 
-    def __init__(self, action: int, duration: float,
-                 weight: float, height: float) -> None:
-        super().__init__(action, duration, weight)
-        self.height = height
+    height: float
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при спортивной ходьбе."""
@@ -110,18 +100,16 @@ class SportsWalking(Training):
         return sports_walking_spent_calories
 
 
+@dataclass
 class Swimming(Training):
     """Тренировка: плавание."""
 
-    LEN_STEP: float = 1.38
-    SWIMMING_SPEED_COEFF_1: float = 1.1
-    SWIMMING_SPEED_COEFF_2: float = 2.0
+    LEN_STEP: float = field(default=1.38, init=False)
+    SWIMMING_SPEED_COEFF_1: float = field(default=1.1, init=False)
+    SWIMMING_SPEED_COEFF_2: float = field(default=2.0, init=False)
 
-    def __init__(self, action: int, duration: float, weight: float,
-                 length_pool: float, count_pool: int) -> None:
-        super().__init__(action, duration, weight)
-        self.length_pool = length_pool
-        self.count_pool = count_pool
+    length_pool: float
+    count_pool: int
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения при плавании."""
@@ -147,10 +135,13 @@ def read_package(workout_type: str, data: list) -> Training:
         'WLK': SportsWalking
     }
 
-    if workout_type in training_packages:
-        return training_packages[workout_type](*data)
-    else:
+    if workout_type not in training_packages:
         raise ValueError(f'Тип тренировки {workout_type} не поддерживается.')
+    elif len(data) < 3:
+        raise ValueError(f'В пакете {workout_type}:{data} '
+                         'недостаточно данных о результатах тренировки.')
+    else:
+        return training_packages[workout_type](*data)
 
 
 def main(training: Training) -> None:
