@@ -140,8 +140,7 @@ def read_package(workout_type: str, data: list) -> Training:
     elif len(data) < 3:
         raise ValueError(f'В пакете {workout_type}:{data} '
                          'недостаточно данных о результатах тренировки.')
-    else:
-        return training_packages[workout_type](*data)
+    return training_packages[workout_type](*data)
 
 
 def main(training: Training) -> None:
